@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Total Salary";
+}
+
+<h2 class="text-success">Total Salary of All Employees</h2>
+
+@if (ViewBag.TotalSalaries != null)
+{
+    <div class="alert alert-info">
+        <strong>Total Salaries:</strong> $ @ViewBag.TotalSalaries
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <strong>Note:</strong> No salary data available.
+    </div>
+}
+
+@Html.ActionLink("Back to Menu", "Index", null, new { @class = "btn btn-secondary" })

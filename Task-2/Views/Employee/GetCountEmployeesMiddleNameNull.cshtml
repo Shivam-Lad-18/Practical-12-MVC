@@ -1,0 +1,14 @@
+﻿@{
+    ViewBag.Title = "Count of Employees with No Middle Name";
+}
+
+<h2 class="text-primary">Employees Without Middle Name</h2>
+
+@if (ViewBag.Count != null)
+{
+    <div class="alert alert-info">
+        <strong>Count:</strong> @ViewBag.Count employees have no middle name.
+    </div>
+}
+
+@Html.ActionLink("Back to Menu", "Index", null, new { @class = "btn btn-secondary" })

@@ -1,0 +1,51 @@
+﻿@model IEnumerable<Task_2.Models.Employee>
+
+@{
+    ViewBag.Title = "Employee List";
+}
+
+<h2 class="text-primary">Employee List</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-success" })
+    @Html.ActionLink("Employees Born Before 2000", "GetEmployeesDOBLessThan2000", null, new { @class = "btn btn-info" })
+    @Html.ActionLink("Employees Without Middle Name", "GetCountEmployeesMiddleNameNull", null, new { @class = "btn btn-warning" })
+    @Html.ActionLink("Get salary", "GetSalary", null, new { @class = "btn btn-primary" })
+</p>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning">
+        <strong>No employees found.</strong> Please add new employees.
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+                <th>@Html.DisplayNameFor(model => model.MiddleName)</th>
+                <th>@Html.DisplayNameFor(model => model.LastName)</th>
+                <th>@Html.DisplayNameFor(model => model.Address)</th>
+                <th>@Html.DisplayNameFor(model => model.DOB)</th>
+                <th>@Html.DisplayNameFor(model => model.MobileNumber)</th>
+                <th>@Html.DisplayNameFor(model => model.Salary)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.MiddleName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Address)</td>
+                    <td>@Html.DisplayFor(modelItem => item.DOB)</td>
+                    <td>@Html.DisplayFor(modelItem => item.MobileNumber)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Salary)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

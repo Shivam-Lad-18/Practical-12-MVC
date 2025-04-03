@@ -1,0 +1,14 @@
+﻿@{
+    ViewBag.Title = "Update All";
+}
+
+<h2 class="text-info">Update All Employees</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">
+        <strong>Updated!</strong> @ViewBag.Message
+    </div>
+}
+
+@Html.ActionLink("Back to Menu", "Index", null, new { @class = "btn btn-primary" })
