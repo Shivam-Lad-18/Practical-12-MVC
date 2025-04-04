@@ -128,7 +128,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\Designation.cs" />
+    <Compile Include="Models\DesignationCount.cs" />
     <Compile Include="Models\Employee.cs" />
+    <Compile Include="Models\EmployeeDesignation.cs" />
+    <Compile Include="Models\EmployeeDetailsView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -179,13 +182,18 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Employee\Index.cshtml" />
     <Content Include="Views\Employee\Create.cshtml" />
     <Content Include="Views\Designation\Index.cshtml" />
     <Content Include="Views\Designation\Create.cshtml" />
+    <Content Include="Views\Employee\GetCountOnDesignation.cshtml" />
+    <Content Include="Views\Employee\getEmployeeWithDesignation.cshtml" />
+    <Content Include="Views\Employee\EmployeeDetailsView.cshtml" />
+    <Content Include="Views\Employee\GetDesignationWithMoreThanOneEmployee.cshtml" />
+    <Content Include="Views\Employee\EmployeeDetailsViewWithDesignation.cshtml" />
+    <Content Include="Views\Employee\EmployeesFromDesignationId.cshtml" />
+    <Content Include="Views\Employee\GetDesignationId.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

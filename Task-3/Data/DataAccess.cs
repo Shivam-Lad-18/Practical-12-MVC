@@ -13,6 +13,7 @@ using System.Data.SqlClient;
 using System.Data;
 using Microsoft.Ajax.Utilities;
 using System.Security.Cryptography;
+using System.Net;
 namespace Task_3.Data
 {
     public class DataAccess
@@ -77,18 +78,19 @@ namespace Task_3.Data
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
-                string query = "INSERT INTO Employee2 (FirstName, MiddleName, LastName, Address, DOB, MobileNumber,Salary,DesignationId) VALUES (@FirstName, @MiddleName, @LastName, @Address, @DOB, @MobileNumber,@Salary,@DesignationId)";
-                using (DbCommand cmd = conn.CreateCommand())
+                using (SqlCommand cmd = new SqlCommand("InsertEmployee", conn))
                 {
-                    cmd.CommandText = query;
-                    cmd.Parameters.Add(new SqlParameter("@FirstName", e.FirstName));
-                    cmd.Parameters.Add(new SqlParameter("@MiddleName", e.MiddleName));
-                    cmd.Parameters.Add(new SqlParameter("@LastName", e.LastName));
-                    cmd.Parameters.Add(new SqlParameter("@Address", e.Address));
-                    cmd.Parameters.Add(new SqlParameter("@DOB", e.DOB));
-                    cmd.Parameters.Add(new SqlParameter("@MobileNumber", e.MobileNumber));
-                    cmd.Parameters.Add(new SqlParameter("@Salary", e.Salary));
-                    cmd.Parameters.Add(new SqlParameter("@DesignationId", e.DesignationId));
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add(new SqlParameter("@FirstName", SqlDbType.NVarChar, 50) { Value = e.FirstName });
+                    cmd.Parameters.Add(new SqlParameter("@MiddleName", SqlDbType.NVarChar, 50) { Value = e.MiddleName });
+                    cmd.Parameters.Add(new SqlParameter("@LastName", SqlDbType.NVarChar, 50) { Value = e.LastName });
+                    cmd.Parameters.Add(new SqlParameter("@DesignationId", SqlDbType.Int) { Value = e.DesignationId });
+                    cmd.Parameters.Add(new SqlParameter("@DOB", SqlDbType.Date) { Value = e.DOB });
+                    cmd.Parameters.Add(new SqlParameter("@MobileNumber", SqlDbType.NVarChar, 10) { Value = e.MobileNumber });
+                    cmd.Parameters.Add(new SqlParameter("@Address", SqlDbType.NVarChar) { Value = e.Address });
+                    cmd.Parameters.Add(new SqlParameter("@Salary", SqlDbType.Decimal) { Value = e.Salary });
+
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -98,19 +100,18 @@ namespace Task_3.Data
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
-                string query = "INSERT INTO Designation (DesignationName) VALUES (@DesignationName)";
-
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (SqlCommand cmd = new SqlCommand("InsertDesignation", conn))
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.Add(new SqlParameter("@DesignationName", SqlDbType.NVarChar, 50) { Value = d.DesignationName });
                     cmd.ExecuteNonQuery();
                 }
             }
         }
-
-        public List<Employee> getEmployeeWithDesignation()
+        //Create a database view that outputs Employee Id, First Name, Middle Name, Last Name, Designation, DOB, Mobile Number, Address & Salary
+        public List<EmployeeDesignation> getEmployeeWithDesignation()
         {
-            List<Employee> employees = new List<Employee>();
+            List<EmployeeDesignation> employees = new List<EmployeeDesignation>();
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
@@ -121,12 +122,12 @@ namespace Task_3.Data
                     {
                         while (reader.Read())
                         {
-                            employees.Add(new Employee
+                            employees.Add(new EmployeeDesignation
                             {
                                 FirstName = reader["FirstName"].ToString(),
                                 MiddleName = reader.IsDBNull(reader.GetOrdinal("MiddleName")) ? null : reader["MiddleName"].ToString(),
                                 LastName = reader["LastName"].ToString(),
-                                DesignationId = reader.GetInt32(reader.GetOrdinal("DesignationId")) // Reads as Int
+                                DesignationName = reader["DesignationName"].ToString()
                             });
                         }
                     }
@@ -134,35 +135,49 @@ namespace Task_3.Data
             }
             return employees;
         }
-        public int getDesignationCount(string DesignationName)
+        // group by desgination in employee table and get the count of employees in each designation
+        public List<DesignationCount> getDesignationCount()
         {
-            int count = 0;
+            List<DesignationCount> employees = new List<DesignationCount>();
             using (SqlConnection conn = new SqlConnection(connString))
             {
                 conn.Open();
-                string query = "SELECT COUNT(*) FROM Employee2 e JOIN Designation d ON e.DesignationId = d.Id WHERE d.DesignationName = @DesignationName";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
-                {
-                    cmd.Parameters.Add(new SqlParameter("@DesignationName", DesignationName));
-                    count = (int)cmd.ExecuteScalar();
-                }
-            }
-            return count;
-        }
-        public List<string> getDesignationWithMoreThanOneEmployee()
-        {
-            List<string> designations = new List<string>();
-            using (SqlConnection conn = new SqlConnection(connString))
-            {
-                conn.Open();
-                string query = "SELECT d.DesignationName FROM Employee2 e JOIN Designation d ON e.DesignationId = d.Id GROUP BY d.DesignationName HAVING COUNT(e.Id) > 1";
+                string query = "SELECT d.DesignationName, COUNT(e.Id) AS EmployeeCount FROM Employee2 e JOIN Designation d ON e.DesignationId = d.Id GROUP BY d.DesignationName";
                 using (SqlCommand cmd = new SqlCommand(query, conn))
                 {
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            designations.Add(reader["DesignationName"].ToString());
+                            employees.Add(new DesignationCount
+                            {
+                                DesignationName = reader["DesignationName"].ToString(),
+                                Count = (int)reader["EmployeeCount"]
+                            });
+                        }
+                    }
+                }
+                return employees;
+            }
+        }
+        public List<DesignationCount> getDesignationWithMoreThanOneEmployee()
+        {
+            List<DesignationCount> designations = new List<DesignationCount>();
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                string query = "SELECT d.DesignationName, COUNT(e.Id) AS EmployeeCount FROM Employee2 e JOIN Designation d ON e.DesignationId = d.Id GROUP BY d.DesignationName HAVING COUNT(e.Id) > 1";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            designations.Add(new DesignationCount
+                            {
+                                DesignationName = reader["DesignationName"].ToString(),
+                                Count = (int)reader["EmployeeCount"]
+                            });
                         }
                     }
                 }
@@ -198,6 +213,99 @@ namespace Task_3.Data
                 }
             }
             return employee;
+        }
+        public List<EmployeeDetailsView> EmployeeDetailsViews()
+        {
+            List<EmployeeDetailsView> employees = new List<EmployeeDetailsView>();
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                string query = "SELECT * FROM EmployeeDetailsView";
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            employees.Add(new EmployeeDetailsView
+                            {
+                                FirstName = reader["FirstName"].ToString(),
+                                MiddleName = reader.IsDBNull(reader.GetOrdinal("MiddleName")) ? null : reader["MiddleName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                DesignationName = reader["DesignationName"].ToString(),
+                                DOB = reader.GetDateTime(reader.GetOrdinal("DOB")), // Reads as DateTime
+                                MobileNumber = reader["MobileNumber"].ToString(),
+                                Address = reader["Address"].ToString(),
+                                Salary = reader.GetDecimal(reader.GetOrdinal("Salary")) // Reads as Decimal
+                            });
+                        }
+                    }
+                }
+            }
+            return employees;
+        }
+        public List<EmployeeDetailsView> GetAllEmployeesStoredProcedure()
+        {
+            List<EmployeeDetailsView> employees = new List<EmployeeDetailsView>();
+
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("GetAllEmployees", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            employees.Add(new EmployeeDetailsView
+                            {
+                                FirstName = reader["FirstName"].ToString(),
+                                MiddleName = reader["MiddleName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                DesignationName = reader["DesignationName"].ToString(),
+                                MobileNumber = reader["MobileNumber"].ToString(),
+                                Address = reader["Address"].ToString(),
+                                DOB = Convert.ToDateTime(reader["DOB"]),
+                                Salary = Convert.ToDecimal(reader["Salary"])
+                            });
+                        }
+                    }
+                }
+            }
+            return employees;
+        }
+        public List<EmployeeDetailsView> GetEmployeesByDesignation(int designationId)
+        {
+            List<EmployeeDetailsView> employees = new List<EmployeeDetailsView>();
+
+            using (SqlConnection conn = new SqlConnection(connString))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand("GetEmployeesByDesignation", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add(new SqlParameter("@DesignationId", SqlDbType.Int) { Value = designationId });
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            employees.Add(new EmployeeDetailsView
+                            {
+                                FirstName = reader["FirstName"].ToString(),
+                                MiddleName = reader["MiddleName"].ToString(),
+                                LastName = reader["LastName"].ToString(),
+                                MobileNumber = reader["MobileNumber"].ToString(),
+                                Address = reader["Address"].ToString(),
+                                DOB = Convert.ToDateTime(reader["DOB"]),
+                                Salary = Convert.ToDecimal(reader["Salary"])
+                            });
+                        }
+                    }
+                }
+            }
+            return employees;
         }
     }
 }
