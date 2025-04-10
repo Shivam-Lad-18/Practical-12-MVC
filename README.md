@@ -2,6 +2,18 @@
 
 This project contains SQL scripts for managing employee records across three tasks. Each task focuses on different aspects of database design including table creation, data insertion, and implementing relationships using foreign keys.
 
+## Database Creation and Setup
+
+```sql
+-- Create the database
+CREATE DATABASE Practical12;
+GO
+
+-- Use the database
+USE Practical12;
+GO
+```
+
 ## Task 1: Basic Employee Table
 
 ### Create Employee Table
@@ -27,7 +39,7 @@ DBCC CHECKIDENT ('Employee', RESEED, 0);
 ### Insert Records
 
 ```sql
-INSERT INTO Employee
+INSERT INTO [Practical12].[dbo].[Employee] 
     ([FirstName], [MiddleName], [LastName], [DOB], [Address], [MobileNumber])
 VALUES 
     ('John', 'A', 'Doe', '1990-05-21', 'New York', '9876543210'),
