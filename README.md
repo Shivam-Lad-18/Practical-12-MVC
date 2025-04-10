@@ -1,13 +1,10 @@
-
-# 📚 SQL Employee Management System
+# SQL Employee Management System
 
 This project contains SQL scripts for managing employee records across three tasks. Each task focuses on different aspects of database design including table creation, data insertion, and implementing relationships using foreign keys.
 
----
+## Task 1: Basic Employee Table
 
-## ✅ Task 1: Basic Employee Table
-
-### 🔧 Create Employee Table
+### Create Employee Table
 
 ```sql
 CREATE TABLE Employee (
@@ -21,13 +18,13 @@ CREATE TABLE Employee (
 );
 ```
 
-### 🔄 Reset Identity (Optional)
+### Reset Identity (Optional)
 
 ```sql
 DBCC CHECKIDENT ('Employee', RESEED, 0);
 ```
 
-### 📥 Insert Records
+### Insert Records
 
 ```sql
 INSERT INTO [Practical12].[dbo].[Employee] 
@@ -45,11 +42,9 @@ VALUES
     ('Ethan', 'K', 'Thomas', '1996-12-20', 'Denver', '9517538520');
 ```
 
----
+## Task 2: Employee Table with Identity and Salary
 
-## ✅ Task 2: Employee Table with Identity and Salary
-
-### 🔧 Create Table `Employee1`
+### Create Table `Employee1`
 
 ```sql
 CREATE TABLE Employee1 (
@@ -64,7 +59,7 @@ CREATE TABLE Employee1 (
 );
 ```
 
-### 📥 Insert Records
+### Insert Records
 
 ```sql
 INSERT INTO Employee1 (FirstName, MiddleName, LastName, DOB, MobileNumber, Address, Salary) VALUES 
@@ -80,11 +75,9 @@ INSERT INTO Employee1 (FirstName, MiddleName, LastName, DOB, MobileNumber, Addre
 ('Ethan', 'K', 'Thomas', '1996-12-20', '3344556677', 'Denver', 67000.00);
 ```
 
----
+## Task 3: Employee with Designation (Foreign Key Relationship)
 
-## ✅ Task 3: Employee with Designation (Foreign Key Relationship)
-
-### 🔧 Create `Designation` Table
+### Create `Designation` Table
 
 ```sql
 CREATE TABLE Designation (
@@ -93,14 +86,14 @@ CREATE TABLE Designation (
 );
 ```
 
-### 📥 Insert Designations
+### Insert Designations
 
 ```sql
 INSERT INTO Designation (Designation) 
 VALUES ('Software Engineer'), ('Project Manager'), ('HR');
 ```
 
-### 🔧 Create `Employee2` Table with Foreign Key
+### Create `Employee2` Table with Foreign Key
 
 ```sql
 CREATE TABLE Employee2 (
@@ -117,7 +110,7 @@ CREATE TABLE Employee2 (
 );
 ```
 
-### 📥 Insert Records into `Employee2`
+### Insert Records into `Employee2`
 
 ```sql
 INSERT INTO Employee2 (FirstName, MiddleName, LastName, DOB, MobileNumber, Address, Salary, DesignationId) 
@@ -128,3 +121,108 @@ VALUES
 ('Sara', NULL, 'Wilson', '1995-07-18', '9776655443', NULL, 70000, 1);
 ```
 
+## Views and Stored Procedures
+
+### Employee Details View
+
+```sql
+CREATE VIEW EmployeeDetailsView AS
+SELECT 
+    e.Id, 
+    e.FirstName, 
+    e.MiddleName, 
+    e.LastName, 
+    d.DesignationName, 
+    e.DOB, 
+    e.MobileNumber, 
+    e.Address, 
+    e.Salary
+FROM 
+    Employee2 e
+JOIN 
+    Designation d ON e.DesignationId = d.Id;
+```
+
+### Insert Employee Procedure
+
+```sql
+CREATE PROCEDURE InsertEmployee  
+    @FirstName VARCHAR(50),  
+    @MiddleName VARCHAR(50) NULL,  
+    @LastName VARCHAR(50),  
+    @DesignationId INT,  
+    @DOB DATE,  
+    @MobileNumber VARCHAR(15),  
+    @Address VARCHAR(255),  
+    @Salary DECIMAL(10,2)  
+AS  
+BEGIN  
+    INSERT INTO Employee2 (FirstName, MiddleName, LastName, DesignationId, DOB, MobileNumber, Address, Salary)  
+    VALUES (@FirstName, @MiddleName, @LastName, @DesignationId, @DOB, @MobileNumber, @Address, @Salary);  
+END;
+```
+
+### Insert Designation Procedure
+
+```sql
+CREATE PROCEDURE InsertDesignation
+    @DesignationName VARCHAR(50)  
+AS  
+BEGIN  
+    INSERT INTO Designation (DesignationName)  
+    VALUES (@DesignationName);  
+END;
+```
+
+### Get All Employees Procedure
+
+```sql
+CREATE PROCEDURE GetAllEmployees  
+AS  
+BEGIN  
+    SELECT  
+        E.Id,  
+        E.FirstName,  
+        E.MiddleName,  
+        E.LastName,  
+        D.DesignationName,  
+        E.DOB,  
+        E.MobileNumber,  
+        E.Address,  
+        E.Salary  
+    FROM Employee2 E  
+    INNER JOIN Designation D ON E.DesignationId = D.Id  
+    ORDER BY E.DOB;  
+END;
+```
+
+### Get Employees By Designation Procedure
+
+```sql
+CREATE PROCEDURE GetEmployeesByDesignation  
+    @DesignationId INT  
+AS  
+BEGIN  
+    SELECT  
+        E.Id,  
+        E.FirstName,  
+        E.MiddleName,  
+        E.LastName,  
+        E.DOB,  
+        E.MobileNumber,  
+        E.Address,  
+        E.Salary  
+    FROM Employee2 E  
+    WHERE E.DesignationId = @DesignationId  
+    ORDER BY E.FirstName;  
+END;
+```
+
+## Indexing
+
+### Non-Clustered Index on DesignationId
+
+```sql
+CREATE NONCLUSTERED INDEX IX_Employee_DesignationId
+ON Employee2(DesignationId);
+```
