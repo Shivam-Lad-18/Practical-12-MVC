@@ -94,14 +94,14 @@ INSERT INTO Employee1 (FirstName, MiddleName, LastName, DOB, MobileNumber, Addre
 ```sql
 CREATE TABLE Designation (
     Id INT PRIMARY KEY IDENTITY(1,1),
-    Designation VARCHAR(50) NOT NULL
+    DesignationName VARCHAR(50) NOT NULL
 );
 ```
 
 ### Insert Designations
 
 ```sql
-INSERT INTO Designation (Designation) 
+INSERT INTO Designation (DesignationName) 
 VALUES ('Software Engineer'), ('Project Manager'), ('HR');
 ```
 
