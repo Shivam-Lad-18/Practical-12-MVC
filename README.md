@@ -39,7 +39,7 @@ DBCC CHECKIDENT ('Employee', RESEED, 0);
 ### Insert Records
 
 ```sql
-INSERT INTO [Practical12].[dbo].[Employee] 
+INSERT INTO Employee
     ([FirstName], [MiddleName], [LastName], [DOB], [Address], [MobileNumber])
 VALUES 
     ('John', 'A', 'Doe', '1990-05-21', 'New York', '9876543210'),
